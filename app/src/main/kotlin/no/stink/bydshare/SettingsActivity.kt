@@ -23,7 +23,7 @@ class SettingsActivity : AppCompatActivity() {
         val cfBox = findViewById<View>(R.id.cfBox)
         val cfId = findViewById<EditText>(R.id.cfClientId)
         val cfSecret = findViewById<EditText>(R.id.cfClientSecret)
-        val deviceToken = findViewById<EditText>(R.id.deviceToken)
+        val accessCode = findViewById<EditText>(R.id.deviceToken)
 
         val edgeLabels = listOf("None", "Cloudflare service token")
         edgeType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, edgeLabels).apply {
@@ -41,7 +41,7 @@ class SettingsActivity : AppCompatActivity() {
         baseUrl.setText(Settings.baseUrl)
         cfId.setText(Settings.cfClientId)
         cfSecret.setText(Settings.cfClientSecret)
-        deviceToken.setText(Settings.deviceToken)
+        accessCode.setText(Settings.accessCode)
         refreshCf()
 
         findViewById<Button>(R.id.save).setOnClickListener {
@@ -50,7 +50,7 @@ class SettingsActivity : AppCompatActivity() {
                 Settings.EdgeAuthType.CLOUDFLARE else Settings.EdgeAuthType.NONE
             Settings.cfClientId = cfId.text.toString()
             Settings.cfClientSecret = cfSecret.text.toString()
-            Settings.deviceToken = deviceToken.text.toString()
+            Settings.accessCode = accessCode.text.toString()
             Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show()
             finish()
         }

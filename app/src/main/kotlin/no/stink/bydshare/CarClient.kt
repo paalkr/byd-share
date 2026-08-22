@@ -1,5 +1,6 @@
 package no.stink.bydshare
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -69,7 +70,21 @@ object CarClient {
     /** Fetch a JWT if we don't have one cached. */
     private fun ensureJwt(): String {
         cachedJwt?.let { return it }
-        val resp = post("/auth/token", JSONObject().put("token", Settings.deviceToken).toString(), jwt = null)
+
+        // Mirror OverDrive's own login: read the deviceId (unauthenticated) and combine
+        // it with the 8-char access code to form the full token.
+        val status = get("/auth/status")
+        if (looksLikeEdgeBlock(status)) throw EdgeException(edgeHint())
+        val deviceId = runCatching { JSONObject(status.body).optString("deviceId", "") }.getOrDefault("")
+        if (deviceId.isEmpty() || deviceId == "unknown") {
+            throw Exception("Couldn't read the car's device id (HTTP ${status.code}).")
+        }
+        val fullToken = deviceId + "-" + Settings.accessCode.trim().lowercase()
+
+        val resp = post("/auth/token", JSONObject().put("token", fullToken).toString(), jwt = null)
+        // Log status only — never the body (it carries the JWT on success).
+        Log.i("CarClient", "auth /auth/token code=${resp.code} edge=${Settings.edgeAuth} " +
+            "hasJwt=${resp.body.contains("\"jwt\"")}")
         if (resp.code == 200) {
             val jwt = runCatching { JSONObject(resp.body).optString("jwt", "") }.getOrDefault("")
             if (jwt.isNotEmpty()) {
@@ -78,7 +93,25 @@ object CarClient {
             }
         }
         if (looksLikeEdgeBlock(resp)) throw EdgeException(edgeHint())
-        throw Exception("Auth failed (${resp.code}) — check the device token.")
+        throw Exception("Auth failed (${resp.code}) — check the access code.")
+    }
+
+    private fun get(path: String): Resp {
+        val conn = (URL(Settings.baseUrl + path).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8000
+            readTimeout = 15000
+            instanceFollowRedirects = false
+            setRequestProperty("User-Agent", USER_AGENT)
+            EdgeAuth.fromSettings().apply(this)
+        }
+        return try {
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            Resp(code, stream?.bufferedReader()?.use { it.readText() }.orEmpty())
+        } finally {
+            conn.disconnect()
+        }
     }
 
     private fun post(path: String, body: String, jwt: String?): Resp {
@@ -113,7 +146,7 @@ object CarClient {
                 else Result(false, runCatching { JSONObject(resp.body).optString("error", "Car rejected the request") }
                     .getOrDefault("Car rejected the request"))
             }
-            401 -> Result(false, "Auth failed — check the device token.")
+            401 -> Result(false, "Auth failed — check the access code.")
             else -> Result(false, "Car returned HTTP ${resp.code}")
         }
     }

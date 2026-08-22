@@ -34,8 +34,8 @@
     <string name="settings_edge_auth">Edge authentication</string>
     <string name="settings_cf_id">Cloudflare Access client id</string>
     <string name="settings_cf_secret">Cloudflare Access client secret</string>
-    <string name="settings_device_token">OverDrive device token</string>
-    <string name="settings_device_token_hint">From OverDrive on the car. Stored encrypted on this device only.</string>
+    <string name="settings_device_token">OverDrive access code</string>
+    <string name="settings_device_token_hint">The 8-character code from OverDrive on the car (same as the OverDrive login). Stored encrypted on this device only.</string>
     <string name="settings_save">Save</string>
     <string name="settings_saved">Saved</string>
     <string name="open_settings">Settings</string>

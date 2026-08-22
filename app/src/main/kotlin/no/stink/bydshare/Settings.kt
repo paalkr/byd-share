@@ -49,9 +49,10 @@ object Settings {
         get() = prefs.getString("cfClientSecret", "").orEmpty()
         set(v) = prefs.edit().putString("cfClientSecret", v.trim()).apply()
 
-    var deviceToken: String
-        get() = prefs.getString("deviceToken", "").orEmpty()
-        set(v) = prefs.edit().putString("deviceToken", v.trim()).apply()
+    /** The 8-char OverDrive access code (secret). The deviceId is fetched from the car. */
+    var accessCode: String
+        get() = prefs.getString("accessCode", "").orEmpty()
+        set(v) = prefs.edit().putString("accessCode", v.trim()).apply()
 
     var defaultFavoriteType: String
         get() = prefs.getString("defaultFavoriteType", "Normal").orEmpty()
@@ -59,7 +60,7 @@ object Settings {
 
     /** Enough configured to reach the car. */
     val isConfigured: Boolean
-        get() = baseUrl.isNotEmpty() && deviceToken.isNotEmpty() &&
+        get() = baseUrl.isNotEmpty() && accessCode.isNotEmpty() &&
             (edgeAuth == EdgeAuthType.NONE ||
                 (cfClientId.isNotEmpty() && cfClientSecret.isNotEmpty()))
 }
