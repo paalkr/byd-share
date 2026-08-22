@@ -91,6 +91,21 @@ class MapsLinkResolverTest {
     }
 
     @Test
+    fun unwrapsConsentContinue() {
+        val consent = "https://consent.google.com/m?continue=" +
+            "https%3A%2F%2Fwww.google.com%2Fmaps%2Fplace%2F60.297682%2C10.257542%2Fdata%3D!3d60.29!4d10.25&gl=NO"
+        val out = MapsLinkResolver.unwrapConsent(consent)
+        assertTrue(out.startsWith("https://www.google.com/maps/place/"))
+        assertNotNull(MapsLinkResolver.parseCoords(out))
+    }
+
+    @Test
+    fun nonConsentUrlUnchanged() {
+        val u = "https://www.google.com/maps/place/60.29,10.25"
+        assertEquals(u, MapsLinkResolver.unwrapConsent(u))
+    }
+
+    @Test
     fun geocodeQueriesSingleLabel() {
         assertEquals(listOf("Ringerikshallen"), MapsLinkResolver.geocodeQueries("Ringerikshallen"))
     }

@@ -60,6 +60,13 @@ object MapsLinkResolver {
 
     fun extractFirstUrl(text: String): String? = URL_RE.find(text)?.value?.trimEnd('.', ',', ')')
 
+    /** If a URL is a Google consent page, return its decoded `continue=` target instead. */
+    fun unwrapConsent(url: String): String {
+        if (!url.contains("consent.google", ignoreCase = true)) return url
+        val m = Regex("""[?&]continue=([^&]+)""").find(url) ?: return url
+        return runCatching { URLDecoder.decode(m.groupValues[1], "UTF-8") }.getOrDefault(url)
+    }
+
     /** True when a string is really just a "lat,lng" pair, not a human name. */
     fun looksLikeCoords(s: String): Boolean = BARE_RE.matches(s.trim())
 
@@ -144,8 +151,9 @@ object MapsLinkResolver {
             return@withContext geocodeInto(nameHint, null, rawText)
         }
 
-        // 2. Follow redirects to the real maps URL.
-        val finalUrl = runCatching { follow(url) }.getOrNull() ?: url
+        // 2. Follow redirects to the real maps URL (unwrapping a consent redirect if we
+        //    still land on one).
+        val finalUrl = unwrapConsent(runCatching { follow(url) }.getOrNull() ?: url)
         val name = parseName(finalUrl) ?: nameHint
 
         // 3. Coordinates from the resolved URL.
@@ -186,9 +194,11 @@ object MapsLinkResolver {
                 }
             }
         }
-        if (name.isNullOrBlank()) {
-            return Resolved(name, null, null, resolvedUrl, rawText,
-                "No link or coordinates found, and no name to look up.", null)
+        // A generic placeholder ("Festet knappenål" / "Dropped pin") is not a real
+        // address — don't forward-geocode it. If we're here we also have no coords.
+        if (name.isNullOrBlank() || isGenericPinName(name)) {
+            return Resolved(null, null, null, resolvedUrl, rawText,
+                "Couldn't get coordinates for this location.", null)
         }
         val hit = runCatching { geocode(name) }.getOrNull()
         return if (hit != null) {
@@ -318,6 +328,9 @@ object MapsLinkResolver {
                 readTimeout = 8000
                 setRequestProperty("User-Agent", USER_AGENT)
                 setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+                // Skip Google's cookie-consent interstitial, which otherwise bounces
+                // through consent.google.com and can strand us off the maps URL.
+                setRequestProperty("Cookie", "CONSENT=YES+cb; SOCS=CAI")
             }
             try {
                 val code = conn.responseCode
@@ -342,6 +355,7 @@ object MapsLinkResolver {
             readTimeout = 8000
             setRequestProperty("User-Agent", USER_AGENT)
             setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+            setRequestProperty("Cookie", "CONSENT=YES+cb; SOCS=CAI")
         }
         return try {
             conn.inputStream.bufferedReader().use { reader ->
