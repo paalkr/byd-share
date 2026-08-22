@@ -3,8 +3,8 @@
     <string name="app_name">Send to BYD</string>
     <string name="share_target_label">Send to BYD</string>
 
-    <string name="main_blurb">Share a place from Google Maps (or any app) and pick \"Send to BYD\". This app resolves the location to coordinates and shows what would be sent to the car\'s Telenav favourites.</string>
-    <string name="main_how">How to use:\n1. Open a place in Google Maps\n2. Tap Share\n3. Choose \"Send to BYD\"\n\nProof-of-concept: it only displays the resolved location for now. Sending it to the car (via OverDrive) comes next.</string>
+    <string name="main_blurb">Share a place from Google Maps (or any app) and pick \"Send to BYD\". It resolves the location, then lets you Navigate to it or Save it to the car\'s favourites.</string>
+    <string name="main_how">First-time setup: open Settings and enter your car connection details.\n\nHow to use:\n1. Open a place in Google Maps\n2. Tap Share\n3. Choose \"Send to BYD\"\n4. Tap Navigate or Save to Favourites</string>
     <string name="version_fmt">Version %1$s</string>
 
     <string name="status_resolving">Resolving shared location…</string>
