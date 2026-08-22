@@ -172,6 +172,20 @@ object MapsLinkResolver {
     }
 
     private fun geocodeInto(name: String?, resolvedUrl: String?, rawText: String): Resolved {
+        // A "name" that is really a lat,lng pair (Google sometimes shares the coordinates
+        // as the title) must NOT be forward-geocoded and kept as the label. Treat it as
+        // coordinates and reverse-geocode a proper name instead.
+        if (name != null && looksLikeCoords(name)) {
+            val m = BARE_RE.find(name)
+            if (m != null) {
+                val lat = m.groupValues[1].toDoubleOrNull()
+                val lng = m.groupValues[2].toDoubleOrNull()
+                if (lat != null && lng != null) {
+                    return coordsResolved(null, null, lat, lng, resolvedUrl, rawText, null,
+                        "coordinates in shared text")
+                }
+            }
+        }
         if (name.isNullOrBlank()) {
             return Resolved(name, null, null, resolvedUrl, rawText,
                 "No link or coordinates found, and no name to look up.", null)

@@ -86,6 +86,7 @@ class MapsLinkResolverTest {
         val url = "https://www.google.com/maps/place/60.185931,10.261529/data=!3d60.18!4d10.26"
         assertNull(MapsLinkResolver.parseName(url))
         assertTrue(MapsLinkResolver.looksLikeCoords("60.185931,10.261529"))
+        assertTrue(MapsLinkResolver.looksLikeCoords("59.714499, 10.147921")) // spaced form
         assertFalse(MapsLinkResolver.looksLikeCoords("Ringerikshallen"))
     }
 
