@@ -2,7 +2,9 @@ package no.stink.bydshare
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Pure-parser tests — no network. Covers the URL shapes Google Maps actually produces. */
@@ -67,5 +69,28 @@ class MapsLinkResolverTest {
     fun trimsTrailingPunctuation() {
         val text = "Check this out (https://maps.app.goo.gl/abc123)."
         assertEquals("https://maps.app.goo.gl/abc123", MapsLinkResolver.extractFirstUrl(text))
+    }
+
+    @Test
+    fun geocodeQueriesSplitsLabel() {
+        val q = MapsLinkResolver.geocodeQueries("Ringerikshallen, Tyrimyrveien 1, 3515 Hønefoss")
+        // Full string first, then the name alone (which is what actually resolves), then the address.
+        assertEquals("Ringerikshallen, Tyrimyrveien 1, 3515 Hønefoss", q[0])
+        assertEquals("Ringerikshallen", q[1])
+        assertEquals("Tyrimyrveien 1, 3515 Hønefoss", q[2])
+    }
+
+    @Test
+    fun droppedPinNameIsNotACoordinate() {
+        // Google shares a dropped pin as /maps/place/<lat,lng>/... — that must not be treated as a name.
+        val url = "https://www.google.com/maps/place/60.185931,10.261529/data=!3d60.18!4d10.26"
+        assertNull(MapsLinkResolver.parseName(url))
+        assertTrue(MapsLinkResolver.looksLikeCoords("60.185931,10.261529"))
+        assertFalse(MapsLinkResolver.looksLikeCoords("Ringerikshallen"))
+    }
+
+    @Test
+    fun geocodeQueriesSingleLabel() {
+        assertEquals(listOf("Ringerikshallen"), MapsLinkResolver.geocodeQueries("Ringerikshallen"))
     }
 }

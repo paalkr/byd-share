@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 class ShareReceiverActivity : AppCompatActivity() {
 
     private lateinit var statusView: TextView
+    private lateinit var detailView: TextView
     private lateinit var nameView: TextView
     private lateinit var coordsView: TextView
     private lateinit var urlView: TextView
@@ -29,11 +30,18 @@ class ShareReceiverActivity : AppCompatActivity() {
     private lateinit var rawView: TextView
     private lateinit var copyButton: Button
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        recreate() // a fresh share should re-resolve, not show the previous result
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_share)
 
         statusView = findViewById(R.id.status)
+        detailView = findViewById(R.id.detail)
         nameView = findViewById(R.id.name)
         coordsView = findViewById(R.id.coords)
         urlView = findViewById(R.id.resolvedUrl)
@@ -63,9 +71,16 @@ class ShareReceiverActivity : AppCompatActivity() {
         nameView.text = r.name ?: "—"
         urlView.text = r.resolvedUrl ?: "—"
 
+        val detailParts = listOfNotNull(
+            r.source?.let { "Source: $it" },
+            r.note,
+        )
+        detailView.text = detailParts.joinToString("\n")
+        detailView.visibility = if (detailParts.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+
         if (r.hasCoords) {
             statusView.text = getString(R.string.status_ready)
-            coordsView.text = "%.6f, %.6f".format(r.lat, r.lng)
+            coordsView.text = "%.6f, %.6f".format(java.util.Locale.US, r.lat, r.lng)
             val json = MapsLinkResolver.toCarJson(r)
             jsonView.text = json
             copyButton.isEnabled = true
