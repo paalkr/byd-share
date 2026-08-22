@@ -33,14 +33,48 @@
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_name" android:textAppearance="?attr/textAppearanceLabelMedium" />
-        <TextView android:id="@+id/name" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodyLarge" android:paddingBottom="12dp" />
+        <EditText android:id="@+id/name" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="text" android:autofillHints="" android:paddingBottom="12dp" />
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_coords" android:textAppearance="?attr/textAppearanceLabelMedium" />
         <TextView android:id="@+id/coords" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:fontFamily="monospace" android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:paddingBottom="16dp" />
+
+        <!-- Actions: send the resolved place to the car -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/label_favourite_type" android:textAppearance="?attr/textAppearanceLabelMedium" />
+        <AutoCompleteTextView android:id="@+id/favType" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:inputType="none" android:focusable="false"
             android:paddingBottom="12dp" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:paddingBottom="8dp">
+            <Button android:id="@+id/navigateButton" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp" android:text="@string/action_navigate" />
+            <Button android:id="@+id/saveButton"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="@string/action_save_favourite" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/sendResult" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:paddingBottom="16dp" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:paddingBottom="16dp">
+            <Button android:id="@+id/settingsButton" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp" android:text="@string/action_settings" />
+            <Button android:id="@+id/copyButton" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp" android:text="@string/copy_json" />
+            <Button android:id="@+id/closeButton"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="@string/close" />
+        </LinearLayout>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_resolved_url" android:textAppearance="?attr/textAppearanceLabelMedium" />
@@ -54,16 +88,6 @@
             android:fontFamily="monospace" android:textAppearance="?attr/textAppearanceBodyMedium"
             android:background="?attr/colorSurfaceVariant" android:padding="12dp"
             android:textIsSelectable="true" android:paddingBottom="16dp" />
-
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:paddingTop="8dp" android:paddingBottom="16dp">
-            <Button android:id="@+id/copyButton" style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp" android:text="@string/copy_json" />
-            <Button android:id="@+id/closeButton"
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:text="@string/close" />
-        </LinearLayout>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_raw" android:textAppearance="?attr/textAppearanceLabelMedium" />

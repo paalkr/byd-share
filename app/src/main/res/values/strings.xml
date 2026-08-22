@@ -18,7 +18,25 @@
     <string name="label_payload">Payload for the car (Telenav favourite)</string>
     <string name="label_raw">Raw shared text</string>
 
-    <string name="copy_json">Copy payload</string>
+    <string name="copy_json">Copy</string>
     <string name="close">Close</string>
     <string name="copied">Payload copied</string>
+
+    <string name="label_favourite_type">Favourite type (for Save)</string>
+    <string name="action_navigate">Navigate</string>
+    <string name="action_save_favourite">Save to Favourites</string>
+    <string name="action_settings">Settings</string>
+    <string name="sending">Sending to car…</string>
+    <string name="not_configured_hint">Not configured yet — open Settings to enter the car connection details.</string>
+
+    <string name="settings_title">Car connection</string>
+    <string name="settings_base_url">Base URL</string>
+    <string name="settings_edge_auth">Edge authentication</string>
+    <string name="settings_cf_id">Cloudflare Access client id</string>
+    <string name="settings_cf_secret">Cloudflare Access client secret</string>
+    <string name="settings_device_token">OverDrive device token</string>
+    <string name="settings_device_token_hint">From OverDrive on the car. Stored encrypted on this device only.</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_saved">Saved</string>
+    <string name="open_settings">Settings</string>
 </resources>

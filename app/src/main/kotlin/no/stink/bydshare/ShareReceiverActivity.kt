@@ -6,7 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,30 +17,38 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 /**
- * The share-sheet target. Receives a shared place (ACTION_SEND text/plain, or a geo: VIEW),
- * resolves it to coordinates, and shows exactly what would be sent to the car.
- *
- * POC: nothing is sent yet. The next step wires the shown JSON to OverDrive's endpoint.
+ * The share-sheet target. Receives a shared place, resolves it to coordinates,
+ * lets the user tweak the name/type, and sends it to the car (Navigate or Save to
+ * Favourites) via [CarClient].
  */
 class ShareReceiverActivity : AppCompatActivity() {
 
+    private val favTypes = listOf("Normal", "Home", "Work", "School", "Gym", "Daycare", "Custom")
+
     private lateinit var statusView: TextView
     private lateinit var detailView: TextView
-    private lateinit var nameView: TextView
+    private lateinit var nameView: EditText
     private lateinit var coordsView: TextView
     private lateinit var urlView: TextView
     private lateinit var jsonView: TextView
     private lateinit var rawView: TextView
+    private lateinit var favType: AutoCompleteTextView
+    private lateinit var navigateButton: Button
+    private lateinit var saveButton: Button
     private lateinit var copyButton: Button
+    private lateinit var sendResult: TextView
+
+    private var resolved: MapsLinkResolver.Resolved? = null
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        recreate() // a fresh share should re-resolve, not show the previous result
+        recreate()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Settings.init(applicationContext)
         setContentView(R.layout.activity_share)
 
         statusView = findViewById(R.id.status)
@@ -47,8 +58,22 @@ class ShareReceiverActivity : AppCompatActivity() {
         urlView = findViewById(R.id.resolvedUrl)
         jsonView = findViewById(R.id.json)
         rawView = findViewById(R.id.raw)
+        favType = findViewById(R.id.favType)
+        navigateButton = findViewById(R.id.navigateButton)
+        saveButton = findViewById(R.id.saveButton)
         copyButton = findViewById(R.id.copyButton)
+        sendResult = findViewById(R.id.sendResult)
+
+        favType.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, favTypes))
+        favType.setText(Settings.defaultFavoriteType.ifEmpty { "Normal" }, false)
+
         findViewById<Button>(R.id.closeButton).setOnClickListener { finish() }
+        findViewById<Button>(R.id.settingsButton).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        navigateButton.setOnClickListener { send(navigate = true) }
+        saveButton.setOnClickListener { send(navigate = false) }
+        setActionsEnabled(false)
 
         val shared = readSharedText(intent)
         val subject = intent.getStringExtra(Intent.EXTRA_SUBJECT)
@@ -60,7 +85,6 @@ class ShareReceiverActivity : AppCompatActivity() {
         }
 
         statusView.text = getString(R.string.status_resolving)
-        copyButton.isEnabled = false
         lifecycleScope.launch {
             val r = MapsLinkResolver.resolve(shared, subject)
             render(r)
@@ -68,32 +92,57 @@ class ShareReceiverActivity : AppCompatActivity() {
     }
 
     private fun render(r: MapsLinkResolver.Resolved) {
-        nameView.text = r.name ?: "—"
+        resolved = r
+        nameView.setText(r.name ?: "")
         urlView.text = r.resolvedUrl ?: "—"
 
-        val detailParts = listOfNotNull(
-            r.source?.let { "Source: $it" },
-            r.note,
-        )
+        val detailParts = listOfNotNull(r.source?.let { "Source: $it" }, r.note)
         detailView.text = detailParts.joinToString("\n")
-        detailView.visibility = if (detailParts.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+        detailView.visibility = if (detailParts.isEmpty()) View.GONE else View.VISIBLE
 
         if (r.hasCoords) {
             statusView.text = getString(R.string.status_ready)
             coordsView.text = "%.6f, %.6f".format(java.util.Locale.US, r.lat, r.lng)
-            val json = MapsLinkResolver.toCarJson(r)
-            jsonView.text = json
-            copyButton.isEnabled = true
+            jsonView.text = MapsLinkResolver.toCarJson(r)
+            setActionsEnabled(true)
             copyButton.setOnClickListener {
-                copyToClipboard(json)
+                copyToClipboard(MapsLinkResolver.toCarJson(r))
                 Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+            }
+            if (!Settings.isConfigured) {
+                sendResult.text = getString(R.string.not_configured_hint)
             }
         } else {
             statusView.text = r.note ?: getString(R.string.status_failed)
             coordsView.text = "—"
             jsonView.text = "—"
-            copyButton.isEnabled = false
+            setActionsEnabled(false)
         }
+    }
+
+    private fun send(navigate: Boolean) {
+        val r = resolved ?: return
+        val lat = r.lat ?: return
+        val lng = r.lng ?: return
+        val name = nameView.text.toString().trim().ifEmpty { "Shared location" }
+        val type = favType.text.toString().ifEmpty { "Normal" }
+        Settings.defaultFavoriteType = type
+
+        setActionsEnabled(false)
+        sendResult.text = getString(R.string.sending)
+        lifecycleScope.launch {
+            val result = if (navigate) CarClient.navigate(name, lat, lng)
+            else CarClient.addFavorite(name, lat, lng, type)
+            sendResult.text = result.message
+            setActionsEnabled(true)
+            if (result.ok) Toast.makeText(this@ShareReceiverActivity, result.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setActionsEnabled(enabled: Boolean) {
+        navigateButton.isEnabled = enabled
+        saveButton.isEnabled = enabled
+        copyButton.isEnabled = enabled
     }
 
     private fun readSharedText(intent: Intent): String = when (intent.action) {
