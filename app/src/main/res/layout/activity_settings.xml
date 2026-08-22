@@ -26,8 +26,8 @@
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/settings_edge_auth" android:textAppearance="?attr/textAppearanceLabelLarge"
             android:paddingTop="8dp" />
-        <AutoCompleteTextView android:id="@+id/edgeType" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:inputType="none" android:focusable="false"
+        <Spinner android:id="@+id/edgeType" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"
             android:paddingBottom="12dp" />
 
         <LinearLayout android:id="@+id/cfBox" android:layout_width="match_parent"

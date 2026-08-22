@@ -45,8 +45,8 @@
         <!-- Actions: send the resolved place to the car -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_favourite_type" android:textAppearance="?attr/textAppearanceLabelMedium" />
-        <AutoCompleteTextView android:id="@+id/favType" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:inputType="none" android:focusable="false"
+        <Spinner android:id="@+id/favType" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"
             android:paddingBottom="12dp" />
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

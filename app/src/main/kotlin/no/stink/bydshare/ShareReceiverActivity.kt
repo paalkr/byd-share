@@ -7,9 +7,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +32,7 @@ class ShareReceiverActivity : AppCompatActivity() {
     private lateinit var urlView: TextView
     private lateinit var jsonView: TextView
     private lateinit var rawView: TextView
-    private lateinit var favType: AutoCompleteTextView
+    private lateinit var favType: Spinner
     private lateinit var navigateButton: Button
     private lateinit var saveButton: Button
     private lateinit var copyButton: Button
@@ -64,8 +64,10 @@ class ShareReceiverActivity : AppCompatActivity() {
         copyButton = findViewById(R.id.copyButton)
         sendResult = findViewById(R.id.sendResult)
 
-        favType.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, favTypes))
-        favType.setText(Settings.defaultFavoriteType.ifEmpty { "Normal" }, false)
+        favType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, favTypes).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        favType.setSelection(favTypes.indexOf(Settings.defaultFavoriteType).coerceAtLeast(0))
 
         findViewById<Button>(R.id.closeButton).setOnClickListener { finish() }
         findViewById<Button>(R.id.settingsButton).setOnClickListener {
@@ -125,7 +127,7 @@ class ShareReceiverActivity : AppCompatActivity() {
         val lat = r.lat ?: return
         val lng = r.lng ?: return
         val name = nameView.text.toString().trim().ifEmpty { "Shared location" }
-        val type = favType.text.toString().ifEmpty { "Normal" }
+        val type = (favType.selectedItem?.toString() ?: "Normal")
         Settings.defaultFavoriteType = type
 
         setActionsEnabled(false)

@@ -2,10 +2,11 @@ package no.stink.bydshare
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -18,22 +19,24 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         val baseUrl = findViewById<EditText>(R.id.baseUrl)
-        val edgeType = findViewById<AutoCompleteTextView>(R.id.edgeType)
+        val edgeType = findViewById<Spinner>(R.id.edgeType)
         val cfBox = findViewById<View>(R.id.cfBox)
         val cfId = findViewById<EditText>(R.id.cfClientId)
         val cfSecret = findViewById<EditText>(R.id.cfClientSecret)
         val deviceToken = findViewById<EditText>(R.id.deviceToken)
 
         val edgeLabels = listOf("None", "Cloudflare service token")
-        edgeType.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, edgeLabels))
-        edgeType.setText(
-            if (Settings.edgeAuth == Settings.EdgeAuthType.CLOUDFLARE) edgeLabels[1] else edgeLabels[0],
-            false,
-        )
-        fun refreshCf() {
-            cfBox.visibility = if (edgeType.text.toString() == edgeLabels[1]) View.VISIBLE else View.GONE
+        edgeType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, edgeLabels).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
-        edgeType.setOnItemClickListener { _, _, _, _ -> refreshCf() }
+        edgeType.setSelection(if (Settings.edgeAuth == Settings.EdgeAuthType.CLOUDFLARE) 1 else 0)
+        fun refreshCf() {
+            cfBox.visibility = if (edgeType.selectedItemPosition == 1) View.VISIBLE else View.GONE
+        }
+        edgeType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) = refreshCf()
+            override fun onNothingSelected(p: AdapterView<*>?) {}
+        }
 
         baseUrl.setText(Settings.baseUrl)
         cfId.setText(Settings.cfClientId)
@@ -43,7 +46,7 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.save).setOnClickListener {
             Settings.baseUrl = baseUrl.text.toString()
-            Settings.edgeAuth = if (edgeType.text.toString() == edgeLabels[1])
+            Settings.edgeAuth = if (edgeType.selectedItemPosition == 1)
                 Settings.EdgeAuthType.CLOUDFLARE else Settings.EdgeAuthType.NONE
             Settings.cfClientId = cfId.text.toString()
             Settings.cfClientSecret = cfSecret.text.toString()
