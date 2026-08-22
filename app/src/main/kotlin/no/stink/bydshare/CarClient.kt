@@ -1,6 +1,5 @@
 package no.stink.bydshare
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -82,9 +81,6 @@ object CarClient {
         val fullToken = deviceId + "-" + Settings.accessCode.trim().lowercase()
 
         val resp = post("/auth/token", JSONObject().put("token", fullToken).toString(), jwt = null)
-        // Log status only — never the body (it carries the JWT on success).
-        Log.i("CarClient", "auth /auth/token code=${resp.code} edge=${Settings.edgeAuth} " +
-            "hasJwt=${resp.body.contains("\"jwt\"")}")
         if (resp.code == 200) {
             val jwt = runCatching { JSONObject(resp.body).optString("jwt", "") }.getOrDefault("")
             if (jwt.isNotEmpty()) {
