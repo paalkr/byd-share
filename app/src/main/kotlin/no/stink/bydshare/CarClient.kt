@@ -142,10 +142,17 @@ object CarClient {
         if (looksLikeEdgeBlock(resp)) return Result(false, edgeHint())
         return when (resp.code) {
             in 200..299 -> {
-                val ok = runCatching { JSONObject(resp.body).optBoolean("success", true) }.getOrDefault(true)
-                if (ok) Result(true, "Sent to car")
-                else Result(false, runCatching { JSONObject(resp.body).optString("error", "Car rejected the request") }
-                    .getOrDefault("Car rejected the request"))
+                val json = runCatching { JSONObject(resp.body) }.getOrNull()
+                val ok = json?.optBoolean("success", true) ?: true
+                when {
+                    !ok -> Result(false, json?.optString("error", "Car rejected the request")
+                        ?: "Car rejected the request")
+                    // Car was off — OverDrive queued it and will offer navigation on next start.
+                    json?.optBoolean("queued", false) == true ->
+                        Result(true, json.optString(
+                            "message", "Car is off — you'll be asked to navigate when it next starts."))
+                    else -> Result(true, "Sent to car")
+                }
             }
             401 -> Result(false, "Auth failed — check the access code.")
             else -> Result(false, "Car returned HTTP ${resp.code}")
