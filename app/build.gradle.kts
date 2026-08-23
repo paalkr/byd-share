@@ -5,15 +5,34 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// Release signing is read from a gitignored keystore.properties at the repo root
-// (storeFile, storePassword, keyAlias, keyPassword). See README "Building a signed
-// release". When it's absent (CI, a fresh clone, contributors) the release build
-// falls back to the debug key so `assembleRelease` still produces an installable —
-// just not the key you publish updates with.
+// Release signing secrets are resolved per field, in priority order:
+//   1. keystore.properties at the repo root (gitignored) — explicit override / CI.
+//   2. the GNOME keyring via `secret-tool` (service=byd-share) — nothing on disk in
+//      plaintext; set up once, then every `assembleRelease` signs with no manual step.
+//   3. otherwise none → the release build falls back to the debug key so it still
+//      builds (just not the key you publish updates with).
+// See README "Building a signed release".
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
 }
+
+fun signingSecret(field: String): String? {
+    keystoreProps.getProperty(field)?.takeIf { it.isNotBlank() }?.let { return it }
+    return runCatching {
+        val proc = ProcessBuilder("secret-tool", "lookup", "service", "byd-share", "field", field)
+            .redirectErrorStream(false).start()
+        val out = proc.inputStream.bufferedReader().use { it.readText() }.trim()
+        if (proc.waitFor() == 0 && out.isNotEmpty()) out else null
+    }.getOrNull()
+}
+
+val relStoreFile = signingSecret("storeFile")
+val relStorePassword = signingSecret("storePassword")
+val relKeyAlias = signingSecret("keyAlias")
+val relKeyPassword = signingSecret("keyPassword")
+val hasReleaseSigning = relStoreFile != null && relStorePassword != null &&
+    relKeyAlias != null && relKeyPassword != null && file(relStoreFile!!).exists()
 
 android {
     namespace = "no.stink.bydshare"
@@ -29,11 +48,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropsFile.exists()) {
-                storeFile = file(keystoreProps.getProperty("storeFile"))
-                storePassword = keystoreProps.getProperty("storePassword")
-                keyAlias = keystoreProps.getProperty("keyAlias")
-                keyPassword = keystoreProps.getProperty("keyPassword")
+            if (hasReleaseSigning) {
+                storeFile = file(relStoreFile!!)
+                storePassword = relStorePassword
+                keyAlias = relKeyAlias
+                keyPassword = relKeyPassword
             }
         }
     }
@@ -44,7 +63,7 @@ android {
             // (Tink) needs careful keep rules — not worth a broken release to shave a
             // couple of MB. Revisit with tested proguard rules if size ever matters.
             isMinifyEnabled = false
-            signingConfig = if (keystorePropsFile.exists())
+            signingConfig = if (hasReleaseSigning)
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")

@@ -90,29 +90,63 @@ specific JDK on `PATH`.
 
 ### Building a signed release
 
-Release builds are signed from a **gitignored** `keystore.properties` at the repo root. Create a
-keystore once, then point the file at it:
+Every published update **must** be signed with the *same* key, or it won't install over the
+previous version. So the key is created once and kept forever — losing it means you can never
+ship an in-place update again. Treat it like a password: back it up, keep it secret.
+
+**1. Create the keystore once:**
 
 ```bash
 keytool -genkey -v -keystore byd-share-release.jks \
     -keyalg RSA -keysize 2048 -validity 10000 -alias byd-share
 ```
 
-```properties
-# keystore.properties (never commit this)
-storeFile=/absolute/path/to/byd-share-release.jks
-storePassword=…
-keyAlias=byd-share
-keyPassword=…
-```
+Keep `byd-share-release.jks` **outside** the repo (it's gitignored anyway) — e.g. `~/.android/`.
+
+**2. Give the build the secrets.** The build resolves four fields — `storeFile`, `storePassword`,
+`keyAlias`, `keyPassword` — in this order: `keystore.properties` → GNOME keyring → (else) the
+debug key. Pick one source:
+
+- **GNOME keyring (recommended on Linux — nothing in plaintext, no per-release step):**
+
+  ```bash
+  secret-tool store --label='byd-share storeFile'     service byd-share field storeFile      # type the .jks path
+  secret-tool store --label='byd-share storePassword' service byd-share field storePassword
+  secret-tool store --label='byd-share keyAlias'      service byd-share field keyAlias        # byd-share
+  secret-tool store --label='byd-share keyPassword'   service byd-share field keyPassword
+  ```
+
+  Set once; every `assembleRelease` afterwards signs automatically (as long as your login keyring
+  is unlocked, which it is in a normal desktop session).
+
+- **`keystore.properties`** (gitignored) — simplest, but passwords sit in plaintext on disk:
+
+  ```properties
+  storeFile=/home/you/.android/byd-share-release.jks
+  storePassword=…
+  keyAlias=byd-share
+  keyPassword=…
+  ```
+
+**3. Build:**
 
 ```bash
 ./gradlew assembleRelease      # APK at app/build/outputs/apk/release/app-release.apk
 ```
 
-If `keystore.properties` is absent the release build falls back to the debug key so it still
-builds — but publish updates with the same release key every time, or they won't install over
-each other.
+If none of the sources provide a complete set, the release build falls back to the debug key so
+it still builds — but that APK is **not** publishable as an update.
+
+### Backing up the key
+
+The keyring/properties file is for *building*; it is not a backup. Store the durable copy in your
+password manager (Keeper is fine — it's encrypted/zero-knowledge): attach the `byd-share-release.jks`
+file and record `keyAlias`, `storePassword`, `keyPassword`. If the laptop dies, you restore the
+`.jks` from Keeper, re-run the `secret-tool store` commands, and you're signing again.
+
+> For fully hands-off releases you can instead sign in CI (e.g. GitHub Actions): store the
+> base64'd keystore + the three secrets as encrypted Actions secrets and have a tag-triggered
+> workflow build, sign, and attach the APK to the release. Keeper stays the human backup.
 
 ## Install on your phone
 
