@@ -29,14 +29,18 @@ object CarClient {
 
     /** POST a shared place as a Save-to-Favourites. */
     suspend fun addFavorite(name: String, lat: Double, lng: Double, favoriteType: String): Result =
-        action("/api/telenav/addFavorite", name, lat, lng, favoriteType)
+        action("/api/telenav/addFavorite", name, lat, lng, favoriteType, replace = false)
 
-    /** POST a shared place as a Navigate. */
-    suspend fun navigate(name: String, lat: Double, lng: Double): Result =
-        action("/api/telenav/navigate", name, lat, lng, null)
+    /**
+     * POST a shared place as a Navigate. [replace] = true forces a fresh single-destination
+     * route (the car stops any active nav first); false adds it as a stop on the active route
+     * (or starts fresh when idle) — Telenav's own default.
+     */
+    suspend fun navigate(name: String, lat: Double, lng: Double, replace: Boolean): Result =
+        action("/api/telenav/navigate", name, lat, lng, null, replace)
 
     private suspend fun action(
-        path: String, name: String, lat: Double, lng: Double, favoriteType: String?,
+        path: String, name: String, lat: Double, lng: Double, favoriteType: String?, replace: Boolean,
     ): Result = withContext(Dispatchers.IO) {
         if (!Settings.isConfigured) {
             return@withContext Result(false, "Not configured — open Settings and enter the car connection details.")
@@ -47,6 +51,7 @@ object CarClient {
             put("lng", lng)
             put("formattedAddress", name)
             if (favoriteType != null) put("favoriteType", favoriteType)
+            put("replace", replace)
         }.toString()
 
         try {

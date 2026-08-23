@@ -35,6 +35,7 @@ class ShareReceiverActivity : AppCompatActivity() {
     private lateinit var jsonView: TextView
     private lateinit var rawView: TextView
     private lateinit var navigateButton: Button
+    private lateinit var addRouteButton: Button
     private lateinit var saveButton: Button
     private lateinit var copyButton: Button
     private lateinit var sendResult: TextView
@@ -60,6 +61,7 @@ class ShareReceiverActivity : AppCompatActivity() {
         jsonView = findViewById(R.id.json)
         rawView = findViewById(R.id.raw)
         navigateButton = findViewById(R.id.navigateButton)
+        addRouteButton = findViewById(R.id.addRouteButton)
         saveButton = findViewById(R.id.saveButton)
         copyButton = findViewById(R.id.copyButton)
         sendResult = findViewById(R.id.sendResult)
@@ -68,7 +70,8 @@ class ShareReceiverActivity : AppCompatActivity() {
         findViewById<Button>(R.id.settingsButton).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        navigateButton.setOnClickListener { send(navigate = true) }
+        navigateButton.setOnClickListener { send(navigate = true, replace = true) }   // fresh route
+        addRouteButton.setOnClickListener { send(navigate = true, replace = false) }  // add as stop
         saveButton.setOnClickListener { send(navigate = false) }
         setActionsEnabled(false)
 
@@ -117,7 +120,7 @@ class ShareReceiverActivity : AppCompatActivity() {
         }
     }
 
-    private fun send(navigate: Boolean) {
+    private fun send(navigate: Boolean, replace: Boolean = false) {
         val r = resolved ?: return
         val lat = r.lat ?: return
         val lng = r.lng ?: return
@@ -126,7 +129,7 @@ class ShareReceiverActivity : AppCompatActivity() {
         setActionsEnabled(false)
         sendResult.text = getString(R.string.sending)
         lifecycleScope.launch {
-            val result = if (navigate) CarClient.navigate(name, lat, lng)
+            val result = if (navigate) CarClient.navigate(name, lat, lng, replace)
             else CarClient.addFavorite(name, lat, lng, favoriteType)
             sendResult.text = result.message
             setActionsEnabled(true)
@@ -136,6 +139,7 @@ class ShareReceiverActivity : AppCompatActivity() {
 
     private fun setActionsEnabled(enabled: Boolean) {
         navigateButton.isEnabled = enabled
+        addRouteButton.isEnabled = enabled
         saveButton.isEnabled = enabled
         copyButton.isEnabled = enabled
     }

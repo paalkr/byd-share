@@ -22,7 +22,8 @@
     <string name="close">Close</string>
     <string name="copied">Payload copied</string>
 
-    <string name="action_navigate">Navigate</string>
+    <string name="action_navigate">Navigate here</string>
+    <string name="action_add_to_route">Add to route</string>
     <string name="action_save_favourite">Save to Favourites</string>
     <string name="action_settings">Settings</string>
     <string name="sending">Sending to car…</string>

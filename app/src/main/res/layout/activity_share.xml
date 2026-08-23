@@ -45,13 +45,17 @@
         <!-- Actions: send the resolved place to the car -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:paddingBottom="8dp">
-            <Button android:id="@+id/navigateButton" style="?attr/materialButtonOutlinedStyle"
+            <Button android:id="@+id/navigateButton"
                 android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp" android:text="@string/action_navigate" />
-            <Button android:id="@+id/saveButton"
+            <Button android:id="@+id/addRouteButton" style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:text="@string/action_save_favourite" />
+                android:text="@string/action_add_to_route" />
         </LinearLayout>
+
+        <Button android:id="@+id/saveButton" style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingBottom="8dp" android:text="@string/action_save_favourite" />
 
         <TextView android:id="@+id/sendResult" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceBodyMedium"
