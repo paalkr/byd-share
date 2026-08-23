@@ -22,8 +22,11 @@ SERVICE="byd-share"        # keyring "service" attribute the Gradle build looks 
 
 die() { echo "error: $*" >&2; exit 1; }
 
+[ "$(id -u)" -eq 0 ] && die "Don't run this with sudo/as root. The signing key and the GNOME keyring are per-user — under sudo the key lands in /root and secret-tool can't reach your keyring. Run it as yourself: ./setup-signing.sh"
+
 command -v keytool     >/dev/null || die "keytool not found — install a JDK (e.g. Temurin 17)."
 command -v secret-tool >/dev/null || die "secret-tool not found — install libsecret-tools."
+[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] || die "No D-Bus session bus — run this in your normal desktop session (not sudo / bare ssh), so the keyring is reachable."
 
 echo "Keystore path: $KEYSTORE"
 echo
