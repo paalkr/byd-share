@@ -94,6 +94,16 @@ Every published update **must** be signed with the *same* key, or it won't insta
 previous version. So the key is created once and kept forever — losing it means you can never
 ship an in-place update again. Treat it like a password: back it up, keep it secret.
 
+**Easiest: run the setup script.** It generates the keystore, stores the secrets in the GNOME
+keyring, and prints exactly what to save in your password manager:
+
+```bash
+./setup-signing.sh            # or: ./setup-signing.sh /custom/path/byd-share-release.jks
+```
+
+Re-running it on a machine that already has the keystore just re-stores the keyring (the
+laptop-died recovery path). The manual equivalent is below.
+
 **1. Create the keystore once:**
 
 ```bash
