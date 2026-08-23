@@ -6,10 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,7 +21,11 @@ import kotlinx.coroutines.launch
  */
 class ShareReceiverActivity : AppCompatActivity() {
 
-    private val favTypes = listOf("Normal", "Home", "Work", "School", "Gym", "Daycare", "Custom")
+    // Telenav's external addFavorite only ever persists the "Normal" bucket (the
+    // heart list). Home/Work are real but set through Telenav's own UI; the other
+    // types (School/Gym/Daycare/Custom) accept the call but silently drop it.
+    // Verified live on the car 2026-08-23 — so there is no type picker any more.
+    private val favoriteType = "Normal"
 
     private lateinit var statusView: TextView
     private lateinit var detailView: TextView
@@ -32,7 +34,6 @@ class ShareReceiverActivity : AppCompatActivity() {
     private lateinit var urlView: TextView
     private lateinit var jsonView: TextView
     private lateinit var rawView: TextView
-    private lateinit var favType: Spinner
     private lateinit var navigateButton: Button
     private lateinit var saveButton: Button
     private lateinit var copyButton: Button
@@ -58,16 +59,10 @@ class ShareReceiverActivity : AppCompatActivity() {
         urlView = findViewById(R.id.resolvedUrl)
         jsonView = findViewById(R.id.json)
         rawView = findViewById(R.id.raw)
-        favType = findViewById(R.id.favType)
         navigateButton = findViewById(R.id.navigateButton)
         saveButton = findViewById(R.id.saveButton)
         copyButton = findViewById(R.id.copyButton)
         sendResult = findViewById(R.id.sendResult)
-
-        favType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, favTypes).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
-        favType.setSelection(favTypes.indexOf(Settings.defaultFavoriteType).coerceAtLeast(0))
 
         findViewById<Button>(R.id.closeButton).setOnClickListener { finish() }
         findViewById<Button>(R.id.settingsButton).setOnClickListener {
@@ -127,14 +122,12 @@ class ShareReceiverActivity : AppCompatActivity() {
         val lat = r.lat ?: return
         val lng = r.lng ?: return
         val name = nameView.text.toString().trim().ifEmpty { "Shared location" }
-        val type = (favType.selectedItem?.toString() ?: "Normal")
-        Settings.defaultFavoriteType = type
 
         setActionsEnabled(false)
         sendResult.text = getString(R.string.sending)
         lifecycleScope.launch {
             val result = if (navigate) CarClient.navigate(name, lat, lng)
-            else CarClient.addFavorite(name, lat, lng, type)
+            else CarClient.addFavorite(name, lat, lng, favoriteType)
             sendResult.text = result.message
             setActionsEnabled(true)
             if (result.ok) Toast.makeText(this@ShareReceiverActivity, result.message, Toast.LENGTH_SHORT).show()

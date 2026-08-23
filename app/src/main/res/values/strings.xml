@@ -22,7 +22,6 @@
     <string name="close">Close</string>
     <string name="copied">Payload copied</string>
 
-    <string name="label_favourite_type">Favourite type (for Save)</string>
     <string name="action_navigate">Navigate</string>
     <string name="action_save_favourite">Save to Favourites</string>
     <string name="action_settings">Settings</string>

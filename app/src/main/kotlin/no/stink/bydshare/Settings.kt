@@ -54,10 +54,6 @@ object Settings {
         get() = prefs.getString("accessCode", "").orEmpty()
         set(v) = prefs.edit().putString("accessCode", v.trim()).apply()
 
-    var defaultFavoriteType: String
-        get() = prefs.getString("defaultFavoriteType", "Normal").orEmpty()
-        set(v) = prefs.edit().putString("defaultFavoriteType", v).apply()
-
     /** Enough configured to reach the car. */
     val isConfigured: Boolean
         get() = baseUrl.isNotEmpty() && accessCode.isNotEmpty() &&
