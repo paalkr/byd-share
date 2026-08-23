@@ -15,13 +15,23 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_title"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:paddingBottom="16dp" />
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_intro"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:paddingBottom="20dp" />
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/settings_base_url" android:textAppearance="?attr/textAppearanceLabelLarge" />
         <EditText android:id="@+id/baseUrl" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:inputType="textUri" android:hint="https://od-byd-seal.example.com"
-            android:autofillHints="" android:paddingBottom="12dp" />
+            android:autofillHints="" android:paddingBottom="4dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/settings_base_url_hint" android:textAppearance="?attr/textAppearanceBodySmall"
+            android:paddingBottom="12dp" />
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/settings_edge_auth" android:textAppearance="?attr/textAppearanceLabelLarge"

@@ -37,8 +37,11 @@ object MapsLinkResolver {
         "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/126.0.0.0 Mobile Safari/537.36"
 
-    // Nominatim's usage policy requires an identifying User-Agent.
-    private const val GEOCODE_USER_AGENT = "byd-share (github.com/paalkr/byd-share; personal project)"
+    // Nominatim's usage policy requires an identifying User-Agent (app name + version
+    // + a contact/repo URL). Reverse/forward geocoding is only a last-resort fallback
+    // and is rate-limited to <=1 req/s below, so volume stays polite.
+    private val GEOCODE_USER_AGENT =
+        "byd-share/${BuildConfig.VERSION_NAME} (+https://github.com/paalkr/byd-share)"
     private const val NOMINATIM = "https://nominatim.openstreetmap.org/search"
     private const val NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse"
 

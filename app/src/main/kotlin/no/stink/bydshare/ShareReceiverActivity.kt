@@ -73,6 +73,13 @@ class ShareReceiverActivity : AppCompatActivity() {
         navigateButton.setOnClickListener { send(navigate = true, replace = true) }   // fresh route
         addRouteButton.setOnClickListener { send(navigate = true, replace = false) }  // add as stop
         saveButton.setOnClickListener { send(navigate = false) }
+
+        val detailsBox = findViewById<View>(R.id.detailsBox)
+        findViewById<Button>(R.id.detailsToggle).setOnClickListener { toggle ->
+            val show = detailsBox.visibility != View.VISIBLE
+            detailsBox.visibility = if (show) View.VISIBLE else View.GONE
+            (toggle as Button).setText(if (show) R.string.details_hide else R.string.details_show)
+        }
         setActionsEnabled(false)
 
         val shared = readSharedText(intent)

@@ -11,3 +11,6 @@
 !debug.keystore
 .idea/
 app/build/
+
+# Release signing secrets — never commit
+/keystore.properties

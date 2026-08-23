@@ -34,13 +34,12 @@
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/label_name" android:textAppearance="?attr/textAppearanceLabelMedium" />
         <EditText android:id="@+id/name" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:inputType="text" android:autofillHints="" android:paddingBottom="12dp" />
+            android:inputType="text" android:autofillHints="" android:paddingBottom="4dp" />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/label_coords" android:textAppearance="?attr/textAppearanceLabelMedium" />
+        <!-- Small, informational: where the place resolved to. -->
         <TextView android:id="@+id/coords" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:fontFamily="monospace" android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:paddingBottom="16dp" />
+            android:textAppearance="?attr/textAppearanceBodySmall" android:alpha="0.7"
+            android:paddingBottom="18dp" />
 
         <!-- Actions: send the resolved place to the car -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -55,42 +54,55 @@
 
         <Button android:id="@+id/saveButton" style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:paddingBottom="8dp" android:text="@string/action_save_favourite" />
+            android:text="@string/action_save_favourite" />
 
         <TextView android:id="@+id/sendResult" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:paddingBottom="16dp" />
+            android:paddingTop="12dp" android:paddingBottom="12dp" />
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:paddingBottom="16dp">
+            android:orientation="horizontal" android:paddingBottom="4dp">
             <Button android:id="@+id/settingsButton" style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp" android:text="@string/action_settings" />
-            <Button android:id="@+id/copyButton" style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp" android:text="@string/copy_json" />
             <Button android:id="@+id/closeButton"
                 android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
                 android:text="@string/close" />
         </LinearLayout>
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/label_resolved_url" android:textAppearance="?attr/textAppearanceLabelMedium" />
-        <TextView android:id="@+id/resolvedUrl" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall" android:textIsSelectable="true"
-            android:paddingBottom="16dp" />
+        <!-- Diagnostics, collapsed by default: resolved link, exact car payload, raw
+             shared text. Handy when a share doesn't resolve; noise otherwise. -->
+        <Button android:id="@+id/detailsToggle" style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="start" android:paddingTop="8dp"
+            android:text="@string/details_show" />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/label_payload" android:textAppearance="?attr/textAppearanceLabelMedium" />
-        <TextView android:id="@+id/json" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:fontFamily="monospace" android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:background="?attr/colorSurfaceVariant" android:padding="12dp"
-            android:textIsSelectable="true" android:paddingBottom="16dp" />
+        <LinearLayout android:id="@+id/detailsBox" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical"
+            android:visibility="gone">
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/label_raw" android:textAppearance="?attr/textAppearanceLabelMedium" />
-        <TextView android:id="@+id/raw" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBodySmall" android:textIsSelectable="true" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/label_resolved_url" android:textAppearance="?attr/textAppearanceLabelMedium" />
+            <TextView android:id="@+id/resolvedUrl" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodySmall" android:textIsSelectable="true"
+                android:paddingBottom="16dp" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/label_payload" android:textAppearance="?attr/textAppearanceLabelMedium" />
+            <TextView android:id="@+id/json" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:fontFamily="monospace" android:textAppearance="?attr/textAppearanceBodySmall"
+                android:background="?attr/colorSurfaceVariant" android:padding="12dp"
+                android:textIsSelectable="true" android:paddingBottom="8dp" />
+            <Button android:id="@+id/copyButton" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" android:text="@string/copy_json" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/label_raw" android:textAppearance="?attr/textAppearanceLabelMedium" />
+            <TextView android:id="@+id/raw" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodySmall" android:textIsSelectable="true" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
