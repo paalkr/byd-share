@@ -54,9 +54,20 @@ object Settings {
         get() = prefs.getString("accessCode", "").orEmpty()
         set(v) = prefs.edit().putString("accessCode", v.trim()).apply()
 
+    /**
+     * Skip authentication entirely: no access-code/JWT flow, no edge auth. For running
+     * against a trusted, unauthenticated endpoint — chiefly OverDrive's loopback HTTP
+     * server when this app runs ON the head unit (baseUrl http://127.0.0.1:8080). The
+     * tunnel path (phone) leaves this off.
+     */
+    var noAuth: Boolean
+        get() = prefs.getBoolean("noAuth", false)
+        set(v) = prefs.edit().putBoolean("noAuth", v).apply()
+
     /** Enough configured to reach the car. */
     val isConfigured: Boolean
-        get() = baseUrl.isNotEmpty() && accessCode.isNotEmpty() &&
-            (edgeAuth == EdgeAuthType.NONE ||
-                (cfClientId.isNotEmpty() && cfClientSecret.isNotEmpty()))
+        get() = baseUrl.isNotEmpty() && (noAuth ||
+            (accessCode.isNotEmpty() &&
+                (edgeAuth == EdgeAuthType.NONE ||
+                    (cfClientId.isNotEmpty() && cfClientSecret.isNotEmpty()))))
 }

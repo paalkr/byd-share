@@ -33,7 +33,9 @@
     <string name="settings_title">Car connection</string>
     <string name="settings_intro">Send to BYD talks to the Telenav bridge in OverDrive on your car. Enter your OverDrive address below. If that address is public and protected (e.g. Cloudflare Access), pick the matching edge authentication; otherwise leave it on None.</string>
     <string name="settings_base_url">Base URL</string>
-    <string name="settings_base_url_hint">Your OverDrive tunnel address, e.g. https://od-byd-seal.example.com — the same host you open OverDrive on.</string>
+    <string name="settings_base_url_hint">Your OverDrive tunnel address, e.g. https://od-byd-seal.example.com — the same host you open OverDrive on. On the head unit itself, use http://127.0.0.1:8080.</string>
+    <string name="settings_noauth">No authentication</string>
+    <string name="settings_noauth_hint">For a trusted, unauthenticated endpoint — mainly OverDrive on the head unit itself (Base URL http://127.0.0.1:8080). Leave off for the phone over the tunnel.</string>
     <string name="settings_edge_auth">Edge authentication</string>
     <string name="settings_cf_id">Cloudflare Access client id</string>
     <string name="settings_cf_secret">Cloudflare Access client secret</string>

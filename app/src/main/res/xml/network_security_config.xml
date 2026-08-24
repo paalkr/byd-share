@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HTTPS stays enforced everywhere (the phone/tunnel path). Cleartext HTTP is
+     permitted ONLY to loopback, for running against OverDrive's own :8080 server
+     when this app is installed on the head unit. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

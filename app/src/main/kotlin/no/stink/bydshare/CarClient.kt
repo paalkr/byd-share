@@ -55,6 +55,11 @@ object CarClient {
         }.toString()
 
         try {
+            if (Settings.noAuth) {
+                // Trusted endpoint (e.g. OverDrive's loopback :8080 on the head unit):
+                // no access-code/JWT flow, no re-mint on 401.
+                return@withContext interpret(post(path, body, jwt = null))
+            }
             var resp = post(path, body, jwt = ensureJwt())
             if (resp.code == 401) {                 // JWT expired/absent — re-mint once and retry.
                 cachedJwt = null

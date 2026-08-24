@@ -24,6 +24,13 @@ class SettingsActivity : AppCompatActivity() {
         val cfId = findViewById<EditText>(R.id.cfClientId)
         val cfSecret = findViewById<EditText>(R.id.cfClientSecret)
         val accessCode = findViewById<EditText>(R.id.deviceToken)
+        val noAuth = findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.swNoAuth)
+        val authBox = findViewById<View>(R.id.authBox)
+
+        noAuth.isChecked = Settings.noAuth
+        fun refreshAuth() { authBox.visibility = if (noAuth.isChecked) View.GONE else View.VISIBLE }
+        noAuth.setOnCheckedChangeListener { _, _ -> refreshAuth() }
+        refreshAuth()
 
         val edgeLabels = listOf("None", "Cloudflare service token")
         edgeType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, edgeLabels).apply {
@@ -45,6 +52,7 @@ class SettingsActivity : AppCompatActivity() {
         refreshCf()
 
         findViewById<Button>(R.id.save).setOnClickListener {
+            Settings.noAuth = noAuth.isChecked
             Settings.baseUrl = baseUrl.text.toString()
             Settings.edgeAuth = if (edgeType.selectedItemPosition == 1)
                 Settings.EdgeAuthType.CLOUDFLARE else Settings.EdgeAuthType.NONE
